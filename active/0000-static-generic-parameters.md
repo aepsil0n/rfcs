@@ -81,7 +81,7 @@ fn add_n<static n: int>(x: int) -> int {
 }
 
 // An n×m matrix
-struct Matrix<T, static n: uint, static m: uint> {
+struct Matrix<T, static n: usize, static m: usize> {
     arr: [[T, ..n], ..m],
 }
 
@@ -105,12 +105,12 @@ parameters and value parameters might become less obvious that way.
 Here are a couple of alternatives:
 
 ```rust
-fn add_n<n: int>(x: int) -> int { /* ... */ }
-fn add_n<static n: int>(x: int) -> int { /* ... */ }
-fn add_n<const n: int>(x: int) -> int { /* ... */ }
-fn add_n<let n: int>(x: int) -> int { /* ... */ }
-fn add_n<value n: int>(x: int) -> int { /* ... */ }
-fn add_n<val n: int>(x: int) -> int { /* ... */ }
+fn add_n<n: i32>(x: i32) -> i32 { /* ... */ }
+fn add_n<static n: i32>(x: i32) -> i32 { /* ... */ }
+fn add_n<const n: i32>(x: i32) -> i32 { /* ... */ }
+fn add_n<let n: i32>(x: i32) -> i32 { /* ... */ }
+fn add_n<value n: i32>(x: i32) -> i32 { /* ... */ }
+fn add_n<val n: i32>(x: i32) -> i32 { /* ... */ }
 
 ```
 
@@ -129,11 +129,11 @@ let x = add_n<3>(2);
 
 It may also be inferred from the context, as much as types can be inferred.
 Consider this function returning a struct generic over some value parameter `n:
-uint`:
+usize`:
 
 ```rust
-struct Bar<static n: uint> { /* ... */ }
-fn bar<static n: uint>(a: [f64, ..n]) -> Bar<n> { /* ... */ }
+struct Bar<static n: usize> { /* ... */ }
+fn bar<static n: usize>(a: [f64, ..n]) -> Bar<n> { /* ... */ }
 
 ```
 
@@ -155,7 +155,7 @@ be expressed completely analogously to default type and lifetime parameters as
 `"static" ident ':' type '=' expr`:
 
 ```rust
-struct SmallVec<static size: uint = 16> {
+struct SmallVec<static size: usize = 16> {
     data: [T, .. size],
 }
 
@@ -176,7 +176,7 @@ their kind could make sense. However, it would be inconsistent with the
 previous restriction to have lifetime parameters come first.
 
 ```rust
-fn foo<'a, T, static n: uint>(a: &'a [T,..n]) -> &'a T;
+fn foo<'a, T, static n: usize>(a: &'a [T,..n]) -> &'a T;
 
 ```
 
@@ -184,7 +184,7 @@ This also potentially has the advantage that the keyword could be omitted for
 all but the first value parameter:
 
 ```rust
-fn foo<T, U, static n: int, x: f32, b: bool>();
+fn foo<T, U, static n: i32, x: f32, b: bool>();
 
 ```
 
@@ -192,9 +192,10 @@ fn foo<T, U, static n: int, x: f32, b: bool>();
 ## Allowed types
 
 The type of an instantiated generic must be known at compile time. This
-naturally limits the types available for value parameters.
+naturally limits the types available for value parameters. Most obviously, the
+lifetime of the type must be static.
 
-The most conservative approach would be to only allow `uint`. This is
+The most conservative approach would be to only allow `usize`. This is
 effectively what C++ does and covers many use cases. However, there are still a
 number of use cases that can not be addressed this way.
 
@@ -203,16 +204,16 @@ equality (those implementing `Eq`).
 
 ```rust
 /// A function with some compile time flag
-fn foo<static flag: bool>(a: int) -> int;
+fn foo<static flag: bool>(a: i32) -> i32;
 
 /// An integer within a range
-struct Range<static lower: int, static upper: int> {
-    n: int,
+struct Range<static lower: i32, static upper: i32> {
+    n: i32,
 }
 
 /// A range type, which may be bound
-struct OptionRange<static lower: Option<int>, static upper: Option<int> {
-    n: int,
+struct OptionRange<static lower: Option<i32>, static upper: Option<i32> {
+    n: i32,
 }
 
 ```
@@ -260,7 +261,7 @@ parameter. This trait could be imposed in the above example as `T: Value`.
 A very diserable feature is to do some algebra with the parameters, like this:
 
 ```rust
-fn concatenate<T, static n: uint, static m: uint>
+fn concatenate<T, static n: usize, static m: usize>
     (x: Vector<T, n>, y: Vector<T, m>) -> Vector<T, n + m>
 {
     let mut new_data: [T, ..n + m] = [0, ..n + m];
@@ -288,9 +289,9 @@ function inversion.
 Consider the following functions:
 
 ```rust
-fn new<static n: int>() -> T<n>;
-fn inc_explicit<static n: int>(x: T<n>) -> T<n + 1> {...}
-fn inc_implicit<static n: int>(x: T<n - 1>) -> T<n> {...}
+fn new<static n: i32>() -> T<n>;
+fn inc_explicit<static n: i32>(x: T<n>) -> T<n + 1> {...}
+fn inc_implicit<static n: i32>(x: T<n - 1>) -> T<n> {...}
 
 #[test]
 fn test_inc() {
@@ -384,7 +385,7 @@ An example:
 
 ```rust
 /// Returns the middle element of a slice with odd length
-fn center<T, static n: uint>(a: &[T, .. n]) -> T
+fn center<T, static n: usize>(a: &[T, .. n]) -> T
     where n % 2 == 1
 { /* ... */ }
 
@@ -393,7 +394,7 @@ fn center<T, static n: uint>(a: &[T, .. n]) -> T
 There are possible collisions:
 
 ```rust
-impl<static n: uint> Foo<n> for Bar<n>
+impl<static n: u32> Foo<n> for Bar<n>
     where n % 2 == 1
 { /* ... */ }
 
